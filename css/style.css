@@ -1,0 +1,97 @@
+
+h2,h3 {
+	text-align: center;
+}
+.select {
+    display:flex;
+    justify-content: center;
+}
+.listing .item {
+	display:flex;
+	flex-wrap:wrap;
+    justify-content: center;
+}
+
+.listing .item > div {
+	margin: 5px;
+	text-align: center;
+	border: 1px solid #CCC;
+	box-sizing: border-box;
+}
+
+
+
+.listing .item > .date {
+	width: 8em;
+}
+.listing .item > .price {
+    width: 8em;
+}
+.listing .item > .assetChange {
+    width: 8em;
+}
+.listing .item > .currencyChange {
+    width: 8em;
+}
+.listing .item > .advice {
+    width: 8em;
+}
+.listing .item > .earncost {
+    width: 8em;
+}
+.listing .item > .relativepl {
+    width: 8em;
+}
+.listing .item > .unrealizedpl {
+    width: 8em;
+}
+.listing .item > .unrealizedplp {
+    width: 8em;
+}
+
+label {
+	display:block;
+	position:relative;
+	min-height: 1.5em;   
+    width: 20em;
+    margin: 5px;
+}
+
+label > input,label > select {
+	position: absolute;
+	right:0;
+	top; 0;
+	width: 10em;
+	text-align: center;
+}
+
+.strategyPanel >.content{
+	display:flex;
+	flex-wrap:wrap;
+    justify-content: center;
+
+}
+
+.strategyPanel  button{
+	max-height: 2em;
+	  align-self: flex-end ;
+	  margin-left: 5em;
+}
+
+.listing .tableHeader {
+	border-bottom: 1px solid;
+	font-weight: bold;
+	
+}
+.listing .tableFooter {
+    border-top: 1px solid;
+    font-weight: bold;
+    
+}
+
+.listing .item input {
+	width:100%;
+	box-sizing: border-box;
+	text-align: center;
+}
+

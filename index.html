@@ -3,10 +3,89 @@
 <head>
   <title>Hodler Strategy</title>
   <link rel="stylesheet" href="css/style.css">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
 </head>
 
 <body onload="start()">
-<script src="http://cdn.jsdelivr.net/npm/pouchdb@6.3.4/dist/pouchdb.min.js" type="text/javascript"></script>
+<script src="https://cdn.jsdelivr.net/npm/pouchdb@6.3.4/dist/pouchdb.min.js" type="text/javascript"></script>
 <script src="js/code.js" type="text/javascript"></script>
+
+<div class="header">
+<h1>HODL (Strategy for hodlers)</h1>
+</div>
+<div class="select">
+<div>
+<label>Select strategy: <select id="curStrategy"><option value="">-- Create new --</option></select></label>
+</div>
+</div>
+<div class="strategyPanel">
+<h2>Strategy settings</h2>
+<div class="content">
+<div>
+<h3>Basic Data</h3>
+
+<label>Name: <input type="text" id="strategyName" /></label>
+<label>Asset: <input type="text" id="strategyAsset" value="BTC"/></label>
+<label>Currency: <input type="text" id="strategyCurrency" value="USD"/></label>
+</div>
+<div class="initialInvestments">
+<h3>Initial investment</h3>
+<label>amount <span class="assetName">asset</span>: <input type="text" id="initialAsset" value="10"/></label>
+<label>at ~price (<span class="currecyName">currency</span>): <input type="text" id="initialCurrency" value="1000"/></label>
+</div>
+<div class="saveSettings">
+</div>
+<button id="saveStrategy">Save settings</button>
+</div>
+</div>
+<div id="workArea">
+
+<div class="listing">
+<h3>Records</h3>
+
+<div class="item tableHeader">
+<div class="date">Date</div>
+<div class="price">Price</div>
+<div class="assetChange"><span class="assetName">asset</span> change</div>
+<div class="advice">Advice</div>
+<div class="earncost">Earnings/Costs</div>
+<div class="relativepl">relative P/L</div>
+<div class="unrealizedpl">unrealized P/L</div>
+<div class="unrealizedplp">unrealized [%]</div>
+</div>
+<template id="tableItem"><div class="item tableRow">
+<div class="date">0</div>
+<div class="price">0</div>
+<div class="assetChange">0</div>
+<div class="advice">0</div>
+<div class="earncost">0</div>
+<div class="relativepl">0 %</div>
+<div class="unrealizedpl">0</div>
+<div class="unrealizedplp">0</div>
+</div>
+</template>
+<div class="item interactive">
+<div class="date">&lt;now&gt;</div>
+<div class="price"><input type="text" id="newPrice"/></div>
+<div class="assetChange"><input type="text" id="newAssetChange"/></div>
+<div class="advice"></div>
+<div class="earncost">0</div>
+<div class="relativepl">0 %</div>
+<div class="unrealizedpl">0</div>
+<div class="unrealizedplp">0</div>
+</div>
+
+<div class="item tableFooter">
+<div class="date">Total</div>
+<div class="price"></div>
+<div class="assetChange"></div>
+<div class="advice"></div>
+<div class="earncost">0</div>
+<div class="relativepl">0 %</div>
+<div class="unrealizedpl">0</div>
+<div class="unrealizedplp">0</div>
+</div>
+</div>
+</div>
 </body>
 </html>
