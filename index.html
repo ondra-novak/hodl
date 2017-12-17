@@ -10,6 +10,20 @@
 <script src="https://cdn.jsdelivr.net/npm/pouchdb@6.3.4/dist/pouchdb.min.js" type="text/javascript"></script>
 <script src="js/code.js" type="text/javascript"></script>
 
+<template id="tableItem"><div class="item tableRow">
+<div class="date">0</div>
+<div class="price">0</div>
+<div class="assetChange">0</div>
+<div class="advice adviceVal">0</div>
+<div class="earncost">0</div>
+<div class="relativepl">0 %</div>
+<div class="unrealizedpl">0</div>
+<div class="unrealizedplp">0</div>
+<div class="actions"><button class="killbutt">X</button></div>
+</div>
+</template>
+
+
 <div class="header">
 <h1>HODL (Strategy for hodlers)</h1>
 </div>
@@ -31,7 +45,7 @@
 <div class="initialInvestments">
 <h3>Initial investment</h3>
 <label>amount <span class="assetName">asset</span>: <input type="text" id="initialAsset" value="10"/></label>
-<label>at ~price (<span class="currecyName">currency</span>): <input type="text" id="initialCurrency" value="1000"/></label>
+<label>at ~price (<span class="currencyName">currency</span>): <input type="text" id="initialCurrency" value="1000"/></label>
 </div>
 <div class="saveSettings">
 </div>
@@ -45,47 +59,41 @@
 
 <div class="item tableHeader">
 <div class="date">Date</div>
-<div class="price">Price</div>
+<div class="price">Price <span class="currencyName">currency</span></div>
 <div class="assetChange"><span class="assetName">asset</span> change</div>
-<div class="advice">Advice</div>
-<div class="earncost">Earnings/Costs</div>
+<div class="advice adviceVal">Advice</div>
+<div class="earncost">Earns/Costs</div>
 <div class="relativepl">relative P/L</div>
-<div class="unrealizedpl">unrealized P/L</div>
-<div class="unrealizedplp">unrealized [%]</div>
+<div class="unrealizedpl">unrealzd. P/L</div>
+<div class="unrealizedplp">unrealzd. [%]</div>
+<div class="actions">Actions</div>
 </div>
-<template id="tableItem"><div class="item tableRow">
-<div class="date">0</div>
-<div class="price">0</div>
-<div class="assetChange">0</div>
-<div class="advice">0</div>
+<div id="table">
+</div>
+<div class="item interactive" id="inputRow">
+<div class="date">NOW</div>
+<div class="price"><input type="text" id="newPrice" class="ingrid"/></div>
+<div class="assetChange"><input type="text" id="newAssetChange" class="ingrid"/></div>
+<div class="advice"><select id="oos"><option value="0" class="adviceVal" selected>0</options><option value="1">OOS *)</option></select></div>
 <div class="earncost">0</div>
 <div class="relativepl">0 %</div>
 <div class="unrealizedpl">0</div>
 <div class="unrealizedplp">0</div>
+<div class="actions"><button id="addrec">Save</button></div>
 </div>
-</template>
-<div class="item interactive">
-<div class="date">&lt;now&gt;</div>
-<div class="price"><input type="text" id="newPrice"/></div>
-<div class="assetChange"><input type="text" id="newAssetChange"/></div>
-<div class="advice"></div>
-<div class="earncost">0</div>
-<div class="relativepl">0 %</div>
-<div class="unrealizedpl">0</div>
-<div class="unrealizedplp">0</div>
-</div>
-
 <div class="item tableFooter">
 <div class="date">Total</div>
 <div class="price"></div>
-<div class="assetChange"></div>
+<div class="assetChange" id="totalAsset"></div>
 <div class="advice"></div>
-<div class="earncost">0</div>
-<div class="relativepl">0 %</div>
-<div class="unrealizedpl">0</div>
-<div class="unrealizedplp">0</div>
+<div class="earncost" id="totalEarnCost"></div>
+<div class="relativepl" id="totalPl">0 %</div>
+<div class="unrealizedpl"></div>
+<div class="unrealizedplp"></div>
+<div class="actions"></div>
 </div>
 </div>
+<div class="smallNote">*) OOS = Out Of Strategy - trade is not part of the strategy, however it still affects the budget, so following calculations are also adjusted to the new value of the budget</div>
 </div>
 </body>
 </html>

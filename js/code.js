@@ -1,64 +1,77 @@
 "use strict";
 
-var db = new PouchDB('HODL');
-
-var designDocuments = [
-  {
-	  _id:"_design/index",
-	  views:{
-		  byStrategy: {
-			  map: function(doc) {
-				  if (doc._id.substr(0,2) == "s.") {
-					  emit([doc._id,0],[doc.initial.amount, doc.initial.price, doc.initial.amount*doc.initial.price]);
-				  } else if (doc._id.substr(0,2) == "r.") {
-					  emit([doc.strategy, parseInt(doc._id.substr(2))],[doc.amount, doc.price, -doc.amount*doc.price]);
-				  }
-			  }.toString(),
-			  reduce:function(keys, values, rereduce) {
-				  return values.reduce(function(v, a) {
-					  return [v[0]+a[0],v[1]+a[1],v[2]+a[2]];
-				  },[0,0,0]);
-			  }.toString(),
-		  }
-	  },
-	  revision:1	  
-  }
-];
-
-
-function updateDesignDocs(ddocs) {
-	function compareAndUploadDDoc(newDoc,oldDoc) {
-		newDoc._rev = oldDoc._rev;
-		if (typeof oldDoc.revision == 'undefined' || newDoc.revision > oldDoc.revision) {
-			db.put(newDoc);
-		}
-	}
-
-	var promises =[];
-	ddocs.forEach(function(x) {		
-		promises.push(
-				db.get(x._id).then(compareAndUploadDDoc.bind(this,x), compareAndUploadDDoc.bind(this,x,{}))
-		);
-	});
-	return Promise.all(promises);
+var defaultSettings = {
+		settings: {
+			name:"",
+			asset:"BTC",
+			currency:"USD",
+		},
+		initial: {
+			amount: 10,
+			price: 10000,
+		},
+		records: [
+		   {
+			   time:12345678,
+			   amount: -1,
+			   price: 15000,
+			   oos: false, 
+		   },
+		   {
+			   time:12378978,
+			   amount: 2,
+			   price: 17000,
+			   oos: true, 
+			   
+		   },
+		   {
+			   time:12589789,
+			   amount: 2,
+			   price: 13000,
+			   oos: false, 
+		   }
+		]
 }
+
+var curStrategy = {
+		settings: {
+			name:"",
+			asset:"BTC",
+			currency:"USD",
+		},
+		initial: {
+			amount: 10,
+			price: 10000,
+		},
+		records: []		
+};
+
+var curStrategyID = "";
+var lastSums; 
 
 function $id(id) {
 	return document.getElementById(id);
 }
 
-function mustBeText(id) {
+function mustBeText(id, validation) {
 	var val = $id(id).value;
 	if (val == "") {
 		$id(id).focus();
 		alert("The field cannot be empty");
 		throw {error:"Validation failed"};		
 	} else {
+		if (validation) {
+			var valError = validation(val);
+			if (valError) {
+				alert("The field validation error: "+valError);
+				throw {error:"Validation failed"};
+			}
+		}
 		return val;
 	}
 }
 
-function mustBeNumber(id) {
+function mustBeNumber(id, validation) {
 	var val = $id(id).value;
 	var num = parseFloat(val);	
 	if (isNaN(num) ) {
@@ -66,93 +79,251 @@ function mustBeNumber(id) {
 		alert("The field must contain a number");
 		throw {error:"Validation failed"};		
 	} else {
+		if (validation) {
+			var valError = validation(num);
+			if (valError) {
+				alert("The field validation error: "+valError);
+				throw {error:"Validation failed"};
+			}
+		}
 		return num;
 	}
 }
 
-function updatePage() {
-	var selected = $id("curStrategy").value;
-	
-	if (selected == "") {				
-		$id("workArea").hidden = true;
-		$id("strategyName").value = "";		
-	} else {
-		db.get(selected).then(function(data){
-			$id("workArea").hidden = false;
-			$id("strategyName").value = data.name;
-			$id("strategyAsset").value = data.asset;
-			$id("strategyCurrency").value = data.currency;
-			$id("initialAsset").value = data.initial.amount;
-			$id("initialCurrency").value = data.initial.price;
-		})
-		
+
+
+function replaceElementText(text,element) {
+	while (element.firstChild) 
+		element.removeChild(element.firstChild);
+	element.appendChild(document.createTextNode(text));
+}
+
+function listStrategies() {
+	var strategies = {}
+	for (var x in localStorage) if (localStorage.hasOwnProperty(x)) {
+		if (x.substr(0,2) == "s.") {
+			var data = JSON.parse(localStorage[x]);
+			strategies[x] = data.settings.name;
+		}		
 	}
+	return strategies;
+}
+
+
+function updatePage() {
+	var initial;
+		var data = curStrategy
+		$id("workArea").hidden = curStrategyID == "";
+		$id("strategyName").value = data.settings.name;
+		$id("strategyAsset").value = data.settings.asset;
+		$id("strategyCurrency").value = data.settings.currency;
+		$id("initialAsset").value = data.initial.amount;
+		$id("initialCurrency").value = data.initial.price;
+		$id("newPrice").focus();
+		initial = data.initial;
+		initial.cost = initial.price *initial.amount;
+		updateSymbols();	
+		updateList();
+
+}
+function updateSymbols() {
+	var asset = $id("strategyAsset").value;
+	var currency = $id("strategyCurrency").value;
+	document.querySelectorAll(".assetName").forEach(replaceElementText.bind(this,asset));
+	document.querySelectorAll(".currencyName").forEach(replaceElementText.bind(this,currency));
+}
+
+
+function calculateAdvice(price, cura, curc) {
+	
+	return  (curc - price * cura )/(2 * price);
+	
+}
+
+function numToStr(x) {
+	var f = -Math.log10(Math.abs(x)+0.0001)+5;
+	if (f < 0) f = 0;
+	return x.toFixed(f);
+	
+}
+
+function deleteLastRecord() {
+	curStrategy.records.pop();
+	updateList();
+}
+
+function addRecordToList(element, x, cura, curc, budget, button) {
+	var titemt = $id("tableItem");
+	var titemrow = document.importNode(titemt.content, true);
+	replaceElementText((new Date(x.time)).toLocaleDateString(), titemrow.querySelector(".date"));
+	replaceElementText(numToStr(x.price), titemrow.querySelector(".price"));
+	replaceElementText(numToStr(x.amount), titemrow.querySelector(".assetChange"));
+	var b = titemrow.querySelector(".killbutt");
+	if (button) {
+		b.hidden = false;
+		b.addEventListener("click",deleteLastRecord);
+	} else {
+		b.hidden = true;
+	}
+	recordCalcs(titemrow, x, cura, curc, budget)
+	element.appendChild(titemrow);
+}
+function recordCalcs(titemrow, x, cura, curc, budget){
+	var earn = -x.amount * x.price;
+	var pl = x.price * cura;
+	replaceElementText(numToStr(earn), titemrow.querySelector(".earncost"));
+	var advice = x.oos?"OOS":numToStr(calculateAdvice(x.price, cura, curc));
+	replaceElementText(numToStr(earn), titemrow.querySelector(".earncost"));
+	replaceElementText(advice, titemrow.querySelector(".adviceVal"));
+	replaceElementText(numToStr(earn/pl * 100)+" %", titemrow.querySelector(".relativepl"));
+	replaceElementText(numToStr((pl-earn)-budget), titemrow.querySelector(".unrealizedpl"));
+	replaceElementText(numToStr((pl-earn)/budget*100), titemrow.querySelector(".unrealizedplp"));
+}
+
+function updateList() {
+	var l = $id("table");	
+	while (l.firstChild) l.removeChild(l.firstChild);
+	var curAsset = curStrategy.initial.amount;
+	var curCurrency = curStrategy.initial.amount*curStrategy.initial.price;
+	var sumEarn = -curCurrency;	
+	var budget = curCurrency; 
+	var last = curStrategy.records.length; 
+	curStrategy.records.forEach(function(x) {
+		
+		last--;
+		
+		addRecordToList(l, x, curAsset, curCurrency, budget, last==0);
+		curAsset += x.amount
+		var cost = x.amount*x.price;
+		sumEarn += -cost;
+		if (x.oos) {
+			curCurrency += cost;
+			budget += cost;
+		} else {
+			curCurrency -= cost;
+		}		
+	})
+	
+	
+	
+	lastSums = [curAsset, curCurrency];
+	replaceElementText(numToStr(curAsset), $id("totalAsset"));
+	replaceElementText(numToStr(sumEarn), $id("totalEarnCost"));
+	replaceElementText(numToStr((sumEarn-budget)/budget*100), $id("totalPl"));
+	
 }
 
 function switchStrategy() {
 	var selected = $id("curStrategy").value;
 	localStorage["strategySelected"] = selected;
+	curStrategyID = selected;
+	if (selected == "") {
+		curStrategy.records=[];
+		curStrategy.settings.name="";
+	} else {
+		curStrategy = JSON.parse(localStorage[selected]);
+	}
 	updatePage();
 }
 
 function updateStrategySelection(curSelection) {
-	
-	db.allDocs({start_key:"s.",end_key:"s.~",include_docs:true })
-		.then(function(curSelection,result){
-			  var i;
-			  var sel = $id("curStrategy");
-			  for(i = sel.options.length - 1 ; i >= 0 ; i--) {
-				  if (sel.options[i].value !="")  sel.remove(i);
-			  }
-			  result.rows.forEach(function(item){
-				 var opt = document.createElement("option");
-				 opt.value = item.doc._id;
-				 opt.text = item.doc.name;				  
-				 if (opt.value == curSelection) {
-					 opt.selected = true;
-				 }
-				 sel.add(opt);
-			  });
-			  updatePage();
-		}.bind(this,curSelection));
-	
-	
+
+	var strat = listStrategies(); 
+	  var sel = $id("curStrategy");
+	  for(var i = sel.options.length - 1 ; i >= 0 ; i--) {
+		  if (sel.options[i].value !="")  sel.remove(i);
+	  }
+	  for (var itm in strat) {
+			 var opt = document.createElement("option");
+			 opt.value = itm;
+			 opt.text = strat[itm];				  
+			 if (opt.value == curSelection) {
+				 opt.selected = true;
+			 }
+			 sel.add(opt);		  
+	  }	
 }
 
 function saveCurrentStrategy() {
-	var selected = $id("curStrategy");
-	var curStrategyID = selected.value;
-	if (curStrategyID == "") {
-		saveToDoc({_id:"s."+Date.now()});
-	} else {
-		db.get(curStrategyID).then(saveToDoc);
+	function valNum(x) {
+		if (x <=0) return "positive number is required";
+		else return null;
+	};
+	curStrategy.settings = {
+			asset : mustBeText("strategyAsset"),
+			currency : mustBeText("strategyCurrency"),
+			name : mustBeText("strategyName"),
+	};
+	curStrategy.initial = {
+		amount: mustBeNumber("initialAsset",valNum),
+		price: mustBeNumber("initialCurrency",valNum)
+	};
+
+	if (curStrategyID=="") {
+		curStrategyID = "s."+Date.now();
 	}
-	
-	function saveToDoc(doc) {
-		doc.name = mustBeText("strategyName");
-		doc.asset = mustBeText("strategyAsset");
-		doc.currency = mustBeText("strategyCurrency");
-		doc.initial = {
-				amount: mustBeNumber("initialAsset"),
-				price: mustBeNumber("initialCurrency")
-		};
-		db.put(doc).then(updateStrategySelection.bind(this,doc._id));
-	}
+	localStorage[curStrategyID] = JSON.stringify(curStrategy);
+	updateStrategySelection(curStrategyID);
 	
 }
+
+function priceMustBeAboveZero(x) {
+	if (x <=0) return "The price must be above the zero";
+	else return null;
+};
+
+
+function addRecord() {
+	
+	var newAssetChange = $id("newAssetChange");
+	var price = mustBeNumber("newPrice",priceMustBeAboveZero);
+	var change;
+	if (newAssetChange.value == "") change = calculateAdvice(price, lastSums[0],lastSums[1]);
+	else change = mustBeNumber("newAssetChange");
+	oos = $id("oos").value;
+	if (change) {
+		curStrategy.records.push({
+			   time:Date.now(),
+			   amount: change,
+			   price: price,
+			   oos: oos == 1, 
+		});
+		localStorage[curStrategyID] = JSON.stringify(curStrategy);
+		updatePage();
+		$id("newPrice").value="";
+		$id("oos").value = "0";
+		newAssetChange.value = "";
+	}
+}
+
+function onInput() {
+	var pstr = $id("newPrice");
+	var price = parseFloat(pstr.value);
+	if (isNaN(price) || price<=0) return;
+	var astr = $id("newAssetChange");
+	var amount= parseFloat(astr.value);
+	if (isNaN(amount)) amount = calculateAdvice(price, lastSums[0],lastSums[1]);
+		
+
+	recordCalcs($id("inputRow"),{price:price, amount:amount},lastSums[0],lastSums[1],lastSums[1]);
+	
+}
+
 function start() {
 	
-	 updateDesignDocs(designDocuments)
-	 .then(updateStrategySelection.bind(this,(function(){
-		 var x = localStorage["strategySelected"];
-		 if (x) return x;
-		 return "";
-	 })()));
+	
+	updateStrategySelection(localStorage["strategySelected"]);	
+	switchStrategy();
+
 	 
 	 $id("saveStrategy").addEventListener("click", function() {
 		saveCurrentStrategy(); 
 	 });
 	 $id("curStrategy").addEventListener("change", switchStrategy);
+	 $id("strategyAsset").addEventListener("change", updateSymbols);
+	 $id("strategyCurrency").addEventListener("change", updateSymbols);
+	 $id("addrec").addEventListener("click", addRecord);
+	 $id("newAssetChange").addEventListener("input", onInput)
+	 $id("newPrice").addEventListener("input", onInput)
 	 
-	
 }
