@@ -122,7 +122,7 @@ function updateSymbols() {
 
 function calculateAdvice(price, cura, curc) {
 	
-	return  (curc - price * cura )/(2 * price);
+	return  (curc/price - cura )/2;
 	
 }
 
@@ -161,7 +161,7 @@ function recordCalcs(titemrow, x, cura, curc, budget){
 	var advice = x.oos?"OOS":numToStr(calculateAdvice(x.price, cura, curc));
 	replaceElementNumb(numToStr(earn), titemrow.querySelector(".earncost"));
 	replaceElementNumb(advice, titemrow.querySelector(".adviceVal"));
-	replaceElementNumb(numToStr(earn/pl * 100)+" %", titemrow.querySelector(".relativepl"));
+	replaceElementNumb(numToStr(earn/curc * 100)+" %", titemrow.querySelector(".relativepl"));
 	replaceElementNumb(numToStr(pl-earn-budget), titemrow.querySelector(".unrealizedpl"));
 	replaceElementNumb(numToStr((pl-earn-budget)/budget*100), titemrow.querySelector(".unrealizedplp"));
 }
@@ -192,7 +192,7 @@ function updateList() {
 	
 	
 	
-	lastSums = [curAsset, curCurrency];
+	lastSums = [curAsset, curCurrency, budget];
 	replaceElementNumb(numToStr(curAsset), $id("totalAsset"));
 	replaceElementNumb(numToStr(sumEarn), $id("totalEarnCost"));
 	replaceElementNumb(numToStr(sumEarn/budget*100)+" %", $id("totalPl"));
@@ -292,7 +292,7 @@ function onInput() {
 	if (isNaN(amount)) amount = calculateAdvice(price, lastSums[0],lastSums[1]);
 		
 
-	recordCalcs($id("inputRow"),{price:price, amount:amount},lastSums[0],lastSums[1],lastSums[1]);
+	recordCalcs($id("inputRow"),{price:price, amount:amount},lastSums[0],lastSums[1],lastSums[2]);
 	
 }
 
