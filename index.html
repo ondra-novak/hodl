@@ -7,7 +7,6 @@
 </head>
 
 <body onload="start()">
-<script src="https://cdn.jsdelivr.net/npm/pouchdb@6.3.4/dist/pouchdb.min.js" type="text/javascript"></script>
 <script src="js/code.js" type="text/javascript"></script>
 
 <template id="tableItem"><div class="item tableRow">
@@ -23,9 +22,10 @@
 </div>
 </template>
 
+<div id="workArea">
+
 
 <div class="header">
-<h1>HODL (Strategy for hodlers)</h1>
 </div>
 <div class="select">
 <div>
@@ -47,12 +47,15 @@
 <label>amount <span class="assetName">asset</span>: <input type="text" id="initialAsset" value="10"/></label>
 <label>at ~price (<span class="currencyName">currency</span>): <input type="text" id="initialCurrency" value="1000"/></label>
 </div>
-<div class="saveSettings">
+<div class="buttonMenu">
+<button id="buttfork" class="buttld">Copy</button>
+<button id="buttdel" class="buttld">Delete</button>
+<button id="saveStrategy" class="buttld">Save</button>
+<button id="createStrategy" class="buttnw">Create</button>
+
 </div>
-<button id="saveStrategy">Save settings</button>
 </div>
 </div>
-<div id="workArea">
 
 <div class="listing">
 <h3>Records</h3>
@@ -79,7 +82,7 @@
 <div class="relativepl">0 %</div>
 <div class="unrealizedpl">0</div>
 <div class="unrealizedplp">0</div>
-<div class="actions"><button id="addrec">Save</button></div>
+<div class="actions"><button id="addrec">+</button></div>
 </div>
 <div class="item tableFooter">
 <div class="date">Total</div>
@@ -92,8 +95,8 @@
 <div class="unrealizedplp"></div>
 <div class="actions"></div>
 </div>
-</div>
 <div class="smallNote">*) OOS = Out Of Strategy - trade is not part of the strategy, however it still affects the budget, so following calculations are also adjusted to the new value of the budget</div>
+</div>
 </div>
 </body>
 </html>

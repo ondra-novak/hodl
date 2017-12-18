@@ -1,6 +1,14 @@
 body {
 	font-family: sans-serif;
-	font-size: 15px;
+	font-size: 12px;
+	background-position:top center;
+	background-repeat:no-repeat;
+	background-size: 100% 500px;
+}
+
+button {
+	
+	
 }
 
 h2,h3 {
@@ -23,33 +31,36 @@ h2,h3 {
 }
 
 
+.buttonMenu {
+	 align-self: flex-end;	
+}
 
 .listing .item > .date {
-	width: 10em;
+	width: 8em;
 }
 .listing .item > .price {
-    width: 10em;
+    width: 8em;
 }
 .listing .item > .assetChange {
-    width: 10em;
+    width: 8em;
 }
 .listing .item > .currencyChange {
-    width: 10em;
+    width: 8em;
 }
 .listing .item > .advice {
-    width: 10em;
+    width: 8em;
 }
 .listing .item > .earncost {
-    width: 10em;
+    width: 8em;
 }
 .listing .item > .relativepl {
-    width: 10em;
+    width: 8em;
 }
 .listing .item > .unrealizedpl {
-    width: 10em;
+    width: 8em;
 }
 .listing .item > .unrealizedplp {
-    width: 10em;
+    width: 8em;
 }
 .listing .item > .actions {
     width: 5em;
@@ -61,16 +72,16 @@ h2,h3 {
 label {
 	display:block;
 	position:relative;
-    width: 20em;
+    width: 250px;
     margin: 5px;
-	line-height:2;
+	line-height:25px;
 	 vertical-align: middle;
 }
 
 label > input,label > select {
 	display: block;
 	float: right;
-	width: 10em;
+	width: 100px;
 	text-align: center;
 	padding: 0px;
 	margin: 0px;
@@ -78,6 +89,9 @@ label > input,label > select {
 	
 }
 
+label > select {
+	width: 150px;
+}
 
 .strategyPanel >.content{
 	display:flex;
@@ -87,9 +101,11 @@ label > input,label > select {
 }
 
 .strategyPanel  button{
-	max-height: 2em;
-	  align-self: flex-end ;
-	  margin-left: 5em;
+	display:block;
+	width: 120px;
+	margin-left: 50px;
+	  
+	  
 }
 
 .listing .tableHeader {
@@ -125,4 +141,28 @@ label > input,label > select {
 	margin-top: 20px;
 	font-size: smaller;
 	font-style: italic;
+	text-align: center;
+}
+
+.newDoc .listing {
+	display:none;
+}
+
+.newDoc .buttld {
+	display:none;
+}
+
+.strategyPanel  .buttnw {
+	display:none;
+}
+
+  .newDoc .strategyPanel .buttnw {
+	display: block;
+}
+
+.negnumb {
+	color: #800000;
+}
+.posnumb {
+	color: #008000;
 }
