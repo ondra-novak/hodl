@@ -256,26 +256,33 @@ function updateChart() {
 	var userChart=[];
 	
 	var assets = curStrategy.initial.amount;
-	var price = curStrategy.initial.price;	
+	var price = curStrategy.initial.price;
+	var initCurrencies = price*assets;
 	var hodlAssets = assets;
 	var adviceAssets = assets;
-	var adviceCurrencies = price*assets;
+	var adviceCurrencies = initCurrencies;
+	var adviceCosts = adviceCurrencies;
 	var userAssets = assets;
+	var userCosts = initCurrencies;
 	
-	function updateChartData(price) {
-		hodlChart.push(hodlAssets*price);
-		adviceChart.push(adviceAssets*price);
-		userChart.push(userAssets*price);
+	function updateChartData(h,a,u) {
+		hodlChart.push(h);
+		adviceChart.push(a);
+		userChart.push(u);
 	}
 	
-	updateChartData(price);
+	updateChartData(0,0,0);
 	
 	function step(item) {
-		updateChartData(item.price);
+		updateChartData(assets*item.price - initCurrencies,
+						adviceAssets*item.price - adviceCosts,
+						userAssets*item.price - userCosts);
 		var advice = calculateAdvice(item.price, adviceAssets, adviceCurrencies)
 		adviceAssets += advice;
 		adviceCurrencies -= advice*item.price;
+		adviceCosts += advice*item.price;
 		userAssets += item.amount;
+		userCosts += item.amount*item.price;
 	}
 	
 	curStrategy.records.forEach(step);
