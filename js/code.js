@@ -265,18 +265,16 @@ function updateChart() {
 	var userAssets = assets;
 	var userCosts = initCurrencies;
 	
-	function updateChartData(h,a,u) {
-		hodlChart.push(h);
-		adviceChart.push(a);
-		userChart.push(u);
+	function updateChartData(p) {
+		hodlChart.push(assets*p - initCurrencies);
+		adviceChart.push(adviceAssets*p - adviceCosts);
+		userChart.push(userAssets*p - userCosts);
 	}
 	
-	updateChartData(0,0,0);
+	updateChartData(price);
 	
 	function step(item) {
-		updateChartData(assets*item.price - initCurrencies,
-						adviceAssets*item.price - adviceCosts,
-						userAssets*item.price - userCosts);
+		updateChartData(item.price);
 		var advice = calculateAdvice(item.price, adviceAssets, adviceCurrencies)
 		adviceAssets += advice;
 		adviceCurrencies -= advice*item.price;
@@ -286,8 +284,14 @@ function updateChart() {
 	}
 	
 	curStrategy.records.forEach(step);
-	chart.update(hodlChart, adviceChart, userChart);
+
+	var curprice = parseFloat($id("newPrice").value);
+	if (!isNaN(curprice)) {
+		updateChartData(curprice);		
+	}
+
 	
+	chart.update(hodlChart, adviceChart, userChart);
 	
 }
 
@@ -388,6 +392,19 @@ function onInput() {
 	
 }
 
+function DelayUpdateChart() {
+	var curVal=0;
+	
+	this.update = function() {
+		var price = parseFloat($id("newPrice").value);
+		if (price != curVal) {
+			updateChart();
+		}
+	}
+	
+	
+}
+
 function copyStrategy() {
 	var newNameTemplate = curStrategy.settings.name;
 	var idxpos = newNameTemplate.lastIndexOf("(");
@@ -447,6 +464,7 @@ function start() {
 		 $id("newPrice").addEventListener("input", onInput);
 		 $id("buttfork").addEventListener("click", copyStrategy);
 		 $id("buttdel").addEventListener("click", delStrategy);
+		 setInterval((new DelayUpdateChart()).update,1000);
    });
 	 
 }
