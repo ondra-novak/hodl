@@ -288,7 +288,6 @@ function updateChart() {
 	curStrategy.records.forEach(step);
 	chart.update(hodlChart, adviceChart, userChart);
 	
-	console.log({hodlChart:hodlChart, adviceChar:adviceChart, userChar:userChart});
 	
 }
 
