@@ -36,31 +36,34 @@ h2,h3 {
 }
 
 .listing .item > .date {
-	width: 8em;
+	width: 6em;
 }
 .listing .item > .price {
-    width: 8em;
+    width: 6em;
 }
 .listing .item > .assetChange {
-    width: 8em;
+    width: 6em;
 }
 .listing .item > .currencyChange {
-    width: 8em;
+    width: 6em;
 }
 .listing .item > .advice {
-    width: 8em;
+    width: 6em;
 }
 .listing .item > .earncost {
-    width: 8em;
+    width: 6em;
 }
 .listing .item > .relativepl {
-    width: 8em;
+    width: 6em;
 }
 .listing .item > .unrealizedpl {
-    width: 8em;
+    width: 6em;
 }
 .listing .item > .unrealizedplp {
-    width: 8em;
+    width: 6em;
+}
+.listing .item > .idx {
+    width: 3em;
 }
 .listing .item > .actions {
     width: 5em;

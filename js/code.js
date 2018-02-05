@@ -17,6 +17,53 @@ var curStrategy = {
 var curStrategyID = "";
 var lastSums; 
 
+function Chart(element) {
+	
+	var elm = element;
+	var chart = new google.visualization.LineChart(element);
+	var options = {
+	          title: 'Strategy performance',
+	          curveType: 'none',
+	          legend: { position: 'bottom' },
+	          colors:['#888888', '#88CCCC', '#000088'],
+	          vAxis : {
+	        	  minorGridlines: {
+	        		  count:5
+	        	  }
+	          },
+	          hAxis: {},
+	          pointsVisible:true
+	        };
+	
+		
+	this.update = function(hodl,advice,user) {
+
+		if (hodl.length < 2) {
+			elm.hidden = true;	
+			return;
+		} else {
+			elm.hidden = false;
+		}
+		
+		var data = [["Trade","HODLing performance","Advices performance","User performance"]];
+		var ticks = [];
+		
+		for (var i = 0 ; i < hodl.length; i++) {
+			data.push( [i,hodl[i],advice[i],user[i]]);
+			ticks.push({v:i,f:""+i});
+		}
+		if (hodl.length)  {
+			options.vAxis.baseline = hodl[0];
+		}
+		options.hAxis.ticks = ticks;
+		
+		chart.draw(google.visualization.arrayToDataTable(data), options);
+	}
+	
+}
+
+var chart;
+
 function $id(id) {
 	return document.getElementById(id);
 }
@@ -138,9 +185,10 @@ function deleteLastRecord() {
 	updateList();
 }
 
-function addRecordToList(element, x, cura, curc, budget, button) {
+function addRecordToList(element,index, x, cura, curc, budget, button) {
 	var titemt = $id("tableItem");
 	var titemrow = document.importNode(titemt.content, true);
+	replaceElementText("#"+index,titemrow.querySelector(".idx"))
 	replaceElementText((new Date(x.time)).toLocaleDateString(), titemrow.querySelector(".date"));
 	replaceElementNumb(numToStr(x.price), titemrow.querySelector(".price"));
 	replaceElementNumb(numToStr(x.amount), titemrow.querySelector(".assetChange"));
@@ -154,6 +202,7 @@ function addRecordToList(element, x, cura, curc, budget, button) {
 	recordCalcs(titemrow, x, cura, curc, budget)
 	element.appendChild(titemrow);
 }
+
 function recordCalcs(titemrow, x, cura, curc, budget){
 	var earn = -x.amount * x.price;
 	var pl = x.price * cura;	
@@ -174,11 +223,11 @@ function updateList() {
 	var sumEarn = 0;	
 	var budget = curCurrency; 
 	var last = curStrategy.records.length; 
-	curStrategy.records.forEach(function(x) {
+	curStrategy.records.forEach(function(x,i) {
 		
 		last--;
 		
-		addRecordToList(l, x, curAsset, curCurrency, budget, last==0);
+		addRecordToList(l,i+1, x, curAsset, curCurrency, budget, last==0);
 		curAsset += x.amount
 		var cost = x.amount*x.price;
 		sumEarn += -cost;
@@ -196,6 +245,43 @@ function updateList() {
 	replaceElementNumb(numToStr(curAsset), $id("totalAsset"));
 	replaceElementNumb(numToStr(sumEarn), $id("totalEarnCost"));
 	replaceElementNumb(numToStr(sumEarn/budget*100)+" %", $id("totalPl"));
+	
+	updateChart();
+	
+}
+
+function updateChart() {
+	var hodlChart=[];
+	var adviceChart=[];
+	var userChart=[];
+	
+	var assets = curStrategy.initial.amount;
+	var price = curStrategy.initial.price;	
+	var hodlAssets = assets;
+	var adviceAssets = assets;
+	var adviceCurrencies = price*assets;
+	var userAssets = assets;
+	
+	function updateChartData(price) {
+		hodlChart.push(hodlAssets*price);
+		adviceChart.push(adviceAssets*price);
+		userChart.push(userAssets*price);
+	}
+	
+	updateChartData(price);
+	
+	function step(item) {
+		updateChartData(item.price);
+		var advice = calculateAdvice(item.price, adviceAssets, adviceCurrencies)
+		adviceAssets += advice;
+		adviceCurrencies -= advice*item.price;
+		userAssets += item.amount;
+	}
+	
+	curStrategy.records.forEach(step);
+	chart.update(hodlChart, adviceChart, userChart);
+	
+	console.log({hodlChart:hodlChart, adviceChar:adviceChart, userChar:userChart});
 	
 }
 
@@ -331,25 +417,30 @@ function delStrategy() {
 }
 
 function start() {
-	
-	
-	updateStrategySelection(localStorage["strategySelected"]);	
-	switchStrategy();
 
-	 
-	 $id("saveStrategy").addEventListener("click", function() {
-		saveCurrentStrategy(); 
-	 });
-	 $id("createStrategy").addEventListener("click", function() {
+   google.charts.load('current', {'packages':['corechart']});
+   google.charts.setOnLoadCallback(function() {
+		
+		chart = new Chart(chartContainer);
+	
+		updateStrategySelection(localStorage["strategySelected"]);	
+		switchStrategy();
+	
+		 
+		 $id("saveStrategy").addEventListener("click", function() {
 			saveCurrentStrategy(); 
 		 });
-	 $id("curStrategy").addEventListener("change", switchStrategy);
-	 $id("strategyAsset").addEventListener("change", updateSymbols);
-	 $id("strategyCurrency").addEventListener("change", updateSymbols);
-	 $id("addrec").addEventListener("click", addRecord);
-	 $id("newAssetChange").addEventListener("input", onInput)
-	 $id("newPrice").addEventListener("input", onInput);
-	 $id("buttfork").addEventListener("click", copyStrategy);
-	 $id("buttdel").addEventListener("click", delStrategy);
+		 $id("createStrategy").addEventListener("click", function() {
+				saveCurrentStrategy(); 
+			 });
+		 $id("curStrategy").addEventListener("change", switchStrategy);
+		 $id("strategyAsset").addEventListener("change", updateSymbols);
+		 $id("strategyCurrency").addEventListener("change", updateSymbols);
+		 $id("addrec").addEventListener("click", addRecord);
+		 $id("newAssetChange").addEventListener("input", onInput)
+		 $id("newPrice").addEventListener("input", onInput);
+		 $id("buttfork").addEventListener("click", copyStrategy);
+		 $id("buttdel").addEventListener("click", delStrategy);
+   });
 	 
 }
