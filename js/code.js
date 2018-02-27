@@ -439,6 +439,7 @@ function delStrategy() {
 	}
 }
 
+
 function start() {
 
    google.charts.load('current', {'packages':['corechart']});
@@ -465,6 +466,19 @@ function start() {
 		 $id("buttfork").addEventListener("click", copyStrategy);
 		 $id("buttdel").addEventListener("click", delStrategy);
 		 setInterval((new DelayUpdateChart()).update,1000);
+   });
+   $id("tybutton").addEventListener("click",function(e){
+   		document.querySelector(".support-page").classList.add("hid");   		
+   		e.preventDefault();
+   });
+   var iframeloaded = false;
+   $id("support").addEventListener("click",function(e) {
+	   document.querySelector(".support-page").classList.remove("hid");
+	   if (iframeloaded == false) {
+		   document.querySelector(".support-page iframe").setAttribute("src","donate.html");
+		   iframeloaded = true;
+	   }
+	   e.preventDefault();
    });
 	 
 }
