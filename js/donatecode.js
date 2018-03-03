@@ -76,6 +76,7 @@ function updateSupportPage() {
 
 		$id("valid_data").hidden = r == 0;
 		$id("invalid_data").hidden = r != 0;
+		$id("thank_you").hidden = true;
 
 		var mult = 100000000;
 		var total = Math.round((amount / r)*mult) / mult; 
@@ -100,14 +101,17 @@ function updateSupportPage() {
 				 $id("paytrezor").classList.add("busy");
 				 $id("paytrezor_err").innerHTML='';
 				 TrezorConnect.setCurrency(currency);
+				 TrezorConnect.closeAfterSuccess(false);
 				 TrezorConnect.composeAndSignTx([{
 					 address:address,amount: (total * mult) | 0
 					}], function (result) {
 						$id("paytrezor").classList.remove("busy");
 						if (result.success) {
+							TrezorConnect.closeAfterSuccess(true);
 							TrezorConnect.pushTransaction(result.serialized_tx, function (pushResult) {
 								if (pushResult.success) {
-									console.log('Transaction pushed. Id:', pushResult.txid); // ID of the transaction
+									$id("thank_you").hidden = false;
+									$id("valid_data").hidden = true;
 								} else {
 									$id("paytrezor_err").innerHTML='An error happened: '+ pushResult.error;
 								}
@@ -128,8 +132,8 @@ function updateSupportPage() {
 function start() {
 
    qrcode_gen = new QRCode("qrcode_area");
-   $id("gift").addEventListener("click",updateSupportPage);
-   $id("giftcurrency").addEventListener("click",updateSupportPage);
+   $id("gift").addEventListener("change",updateSupportPage);
+   $id("giftcurrency").addEventListener("change",updateSupportPage);
    updateSupportPage();
    $id("qrcode_area").addEventListener("click",function() {
    		window.open($id("qrcode_area").dataset.href);

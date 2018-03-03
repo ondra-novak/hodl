@@ -348,7 +348,7 @@ function saveCurrentStrategy() {
 	updateStrategySelection(curStrategyID);
 	updatePage();
 	
-}
+} 
 
 function priceMustBeAboveZero(x) {
 	if (x <=0) return "The price must be above the zero";

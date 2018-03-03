@@ -72,3 +72,9 @@ dd{
 	margin: 50px 0px;	
 }
 
+
+#thank_you {
+	font-size: 20px;
+	color: green;
+	font-weight: bold;
+}
