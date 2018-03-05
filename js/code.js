@@ -472,13 +472,18 @@ function start() {
    		e.preventDefault();
    });
    var iframeloaded = false;
-   $id("support").addEventListener("click",function(e) {
+   function showSupport() {
 	   document.querySelector(".support-page").classList.remove("hid");
 	   if (iframeloaded == false) {
 		   document.querySelector(".support-page iframe").setAttribute("src","donate.html");
 		   iframeloaded = true;
 	   }
+   };
+   $id("support").addEventListener("click",function(e) {
+	   showSupport();
 	   e.preventDefault();
    });
-	 
+   if (location.hash == "#support") {
+	   showSupport();
+   }	 
 }
