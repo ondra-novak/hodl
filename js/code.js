@@ -6,6 +6,7 @@ var curStrategy = {
 			name:"",
 			asset:"BTC",
 			currency:"USD",
+			lowest: 0
 		},
 		initial: {
 			amount: 10,
@@ -152,6 +153,7 @@ function updatePage() {
 		$id("strategyCurrency").value = data.settings.currency;
 		$id("initialAsset").value = data.initial.amount;
 		$id("initialCurrency").value = data.initial.price;
+		$id("lowestPrice").value = data.settings.lowest?data.settings.lowest:0;
 		$id("newPrice").focus();
 		initial = data.initial;
 		initial.cost = initial.price *initial.amount;
@@ -169,7 +171,10 @@ function updateSymbols() {
 
 function calculateAdvice(price, cura, curc) {
 	
-	return  (curc/price - cura )/2;
+
+	var fakeprice = price - curStrategy.settings.lowest;
+	var fakeadv = (curc - fakeprice*cura)/2;
+	return fakeadv / price;
 	
 }
 
@@ -331,10 +336,15 @@ function saveCurrentStrategy() {
 		if (x <=0) return "positive number is required";
 		else return null;
 	};
+	function valNum0(x) {
+		if (x <0) return "non-negative number is required";
+		else return null;
+	};
 	curStrategy.settings = {
 			asset : mustBeText("strategyAsset"),
 			currency : mustBeText("strategyCurrency"),
 			name : mustBeText("strategyName"),
+			lowest: mustBeNumber("lowestPrice",valNum0)
 	};
 	curStrategy.initial = {
 		amount: mustBeNumber("initialAsset",valNum),

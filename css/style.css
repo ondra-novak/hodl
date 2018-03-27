@@ -169,3 +169,15 @@ label > select {
 .posnumb {
 	color: #008000;
 }
+.questionmark {
+	display: inline-block;
+	color: white;
+	font-size: larger;
+	background-color: black;
+	padding: 0px 2px;
+	font-weight: bold;
+	line-height: 1em;
+	border-radius: 10px;
+	position:relative;
+	top: -0.5em;
+}
