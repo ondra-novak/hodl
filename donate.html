@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Donate</title>
+  <link rel="stylesheet" href="css/donate_style.css">
+</head>
+
+<body onload="start()">
+<script type="text/javascript" src="js/donatecode.js"></script>
+<script type="text/javascript" src="js/qrcode.min.js"></script>
+<script src="https://connect.trezor.io/4/connect.js"></script>
+
+<p><strong>Do you like this page?<br> Please support the page with a <big><u>donation!</u></big><br>You can donate your favorite cryptocurrency</strong></p>
+<p><label>Your donation:<select id="gift">
+<option value="5">$5</option>
+<option value="10">$10</option>
+<option value="15">$15</option>
+<option value="20">$20</option>
+<option value="30">$30</option>
+<option value="50">$50</option>
+<option value="70">$70</option>
+<option value="100">$100</option>
+</select></label></p>
+<p><label>Crypto:<select id="giftcurrency">
+<option value="BTC,3QnCMGs5xh2aAPvaYUXESdxG1pyNBEfTXf">Bitcoin (BTC)</option>
+<option value="LTC,MGhXxhLbgas6bv9jPhPkkFUFpM6N972V94">Litecoin (LTC)</option>
+<option value="BCH,14ExYLZ7c5jkJxpML4wZ7MjFroGGPUf2Pg">Bitcoin Cash (BCH)</option>
+<option value="DASH,XnCWfpXX4vydFmq9wQ4Vxp57oZqRb9qAgQ">Dash (DASH)</option>
+<option value="ZEC,t1MsPJ9G2KD1CSSP4uwhj7cHPfvHbT7Tfkd">ZCash (ZEC)</option>
+<option value="ETH,0x01d259b6A838AbcDf81a8A303B98fbb5BA7dA4Fc">Ethereum (ETH)</option>
+<option value="ETC,0x81A335FdB81834534bceD176deB6Eb683aA6d6A9">Ethereum Classic (ETC)</option>
+</select></label></p>
+<div id="valid_data">
+<dl id="details">
+<dt>Address:</dt>
+<dd id="detail_addr"></dd>
+<dt>Amount:</dt>
+<dd id="detail_amount"></dd>
+</dl>
+<div id="qrcode_area"></div>
+<p id="paytrezor" class="paytrezor"><img id="imgtrezor" src="https://trezor.io/static/images/trezor-logo.png">
+<img id="imgmew"  src="https://www.myetherwallet.com/images/logo-myetherwallet.svg"></p>
+<p id="paytrezor_err"></p>
+</div>
+<div id="invalid_data">Exchange rate is not available now. <br>Check internet connection</div>
+<div id="thank_you" hidden="hidden">Thank you!</div>
+
+</body>
+</html>

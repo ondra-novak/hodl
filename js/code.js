@@ -358,7 +358,7 @@ function saveCurrentStrategy() {
 	updateStrategySelection(curStrategyID);
 	updatePage();
 	
-}
+} 
 
 function priceMustBeAboveZero(x) {
 	if (x <=0) return "The price must be above the zero";
@@ -449,6 +449,7 @@ function delStrategy() {
 	}
 }
 
+
 function start() {
 
    google.charts.load('current', {'packages':['corechart']});
@@ -476,5 +477,23 @@ function start() {
 		 $id("buttdel").addEventListener("click", delStrategy);
 		 setInterval((new DelayUpdateChart()).update,1000);
    });
-	 
+   $id("tybutton").addEventListener("click",function(e){
+   		document.querySelector(".support-page").classList.add("hid");   		
+   		e.preventDefault();
+   });
+   var iframeloaded = false;
+   function showSupport() {
+	   document.querySelector(".support-page").classList.remove("hid");
+	   if (iframeloaded == false) {
+		   document.querySelector(".support-page iframe").setAttribute("src","donate.html");
+		   iframeloaded = true;
+	   }
+   };
+   $id("support").addEventListener("click",function(e) {
+	   showSupport();
+	   e.preventDefault();
+   });
+   if (location.hash == "#support") {
+	   showSupport();
+   }	 
 }
