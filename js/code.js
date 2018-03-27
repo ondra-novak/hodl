@@ -196,7 +196,9 @@ function addRecordToList(element,index, x, cura, curc, budget, button) {
 	replaceElementText("#"+index,titemrow.querySelector(".idx"))
 	replaceElementText((new Date(x.time)).toLocaleDateString(), titemrow.querySelector(".date"));
 	replaceElementNumb(numToStr(x.price), titemrow.querySelector(".price"));
-	replaceElementNumb(numToStr(x.amount), titemrow.querySelector(".assetChange"));
+	var elem_assetChange = titemrow.querySelector(".assetChange");
+	replaceElementNumb(numToStr(x.amount), elem_assetChange);
+	elem_assetChange.setAttribute("title","Total "+numToStr(cura+x.amount));
 	var b = titemrow.querySelector(".killbutt");
 	if (button) {
 		b.hidden = false;
@@ -211,9 +213,10 @@ function addRecordToList(element,index, x, cura, curc, budget, button) {
 function recordCalcs(titemrow, x, cura, curc, budget){
 	var earn = -x.amount * x.price;
 	var pl = x.price * cura;	
-	replaceElementText(numToStr(earn), titemrow.querySelector(".earncost"));
 	var advice = x.oos?"OOS":numToStr(calculateAdvice(x.price, cura, curc));
-	replaceElementNumb(numToStr(earn), titemrow.querySelector(".earncost"));
+	var elem_earncost = titemrow.querySelector(".earncost");
+	elem_earncost.setAttribute("title","Budget: "+numToStr(curc+earn));
+	replaceElementNumb(numToStr(earn), elem_earncost);
 	replaceElementNumb(advice, titemrow.querySelector(".adviceVal"));
 	replaceElementNumb(numToStr(earn/curc * 100)+" %", titemrow.querySelector(".relativepl"));
 	replaceElementNumb(numToStr(pl-earn-budget), titemrow.querySelector(".unrealizedpl"));
@@ -309,6 +312,8 @@ function switchStrategy() {
 		curStrategy.settings.name="";
 	} else {
 		curStrategy = JSON.parse(localStorage[selected]);
+		if (!curStrategy.settings.lowest)
+			curStrategy.settings.lowest = 0;
 	}
 	updatePage();
 }
