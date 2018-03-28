@@ -173,8 +173,9 @@ function calculateAdvice(price, cura, curc) {
 	
 
 	var fakeprice = price - curStrategy.settings.lowest;
-	var fakeadv = (curc - fakeprice*cura)/2;
-	return fakeadv / price;
+	var fakec = curc*((curStrategy.initial.price-curStrategy.settings.lowest)/curStrategy.initial.price);
+	var fakeadv = (fakec - cura*fakeprice)/2;
+	return fakeadv/fakeprice;
 	
 }
 
@@ -411,9 +412,10 @@ function DelayUpdateChart() {
 	var curVal=0;
 	
 	this.update = function() {
-		var price = parseFloat($id("newPrice").value);
+		var price = $id("newPrice").value;
 		if (price != curVal) {
 			updateChart();
+			curVal = price;
 		}
 	}
 	
