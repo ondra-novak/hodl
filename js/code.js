@@ -17,6 +17,7 @@ var curStrategy = {
 
 var curStrategyID = "";
 var lastSums; 
+var initialBalanceAdjust = 0;
 
 function Chart(element) {
 	
@@ -142,8 +143,11 @@ function listStrategies() {
 
 
 function updatePage() {
-	var initial;
+		var initial;
 		var data = curStrategy
+		initialBalanceAdjust = [0,0];
+		initialBalanceAdjust[0] = calculateAdvice(data.initial.price, data.initial.amount, data.initial.price*data.initial.amount);
+		initialBalanceAdjust[1] = -initialBalanceAdjust[0]* data.initial.price;
 		if (curStrategyID == "")
 			$id("workArea").classList.add("newDoc");
 		else
@@ -171,11 +175,24 @@ function updateSymbols() {
 
 function calculateAdvice(price, cura, curc) {
 	
-
-	var fakeprice = price - curStrategy.settings.lowest;
-	var fakeadv = (curc - fakeprice*cura)/2;
-	return fakeadv / price;
+	var totaladv = 0;
+	var curadv;
+	var remainc = curc;
+	cura += initialBalanceAdjust[0];
+	curc += initialBalanceAdjust[1];
 	
+	for (var i = 0; i < 20; i++) {
+		var fakeprice = price - curStrategy.settings.lowest;
+		var fakeadv = (curc - fakeprice*cura)/2;
+		curadv =  fakeadv / price;
+		if (Math.abs(fakeadv/curc) < 0.0000001 || remainc - fakeadv < 0)
+			break; 
+		cura += curadv;
+		curc -= fakeadv;
+		remainc -= fakeadv;
+		totaladv += curadv;
+	}
+	return totaladv;
 }
 
 function numToStr(x) {
@@ -314,7 +331,7 @@ function switchStrategy() {
 		curStrategy = JSON.parse(localStorage[selected]);
 		if (!curStrategy.settings.lowest)
 			curStrategy.settings.lowest = 0;
-	}
+	}	
 	updatePage();
 }
 
@@ -411,9 +428,10 @@ function DelayUpdateChart() {
 	var curVal=0;
 	
 	this.update = function() {
-		var price = parseFloat($id("newPrice").value);
+		var price = $id("newPrice").value;
 		if (price != curVal) {
 			updateChart();
+			curVal = price;
 		}
 	}
 	
