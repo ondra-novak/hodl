@@ -3,7 +3,7 @@
 
 var curStrategy = {
 		settings: {
-			name:"",
+			name:"(untitled)",
 			asset:"BTC",
 			currency:"USD",
 			lowest: 0
@@ -18,6 +18,22 @@ var curStrategy = {
 var curStrategyID = "";
 var lastSums; 
 var initialBalanceAdjust = 0;
+var title = document.title;
+
+function updatePageState(uri, saved) {
+	var lastPrice="";
+	if (curStrategy.records.length) {
+		var lastIndex = curStrategy.records.length-1;
+		lastPrice = " "+numToStr(curStrategy.records[lastIndex].price)+" "+curStrategy.settings.currency; 
+	}
+	var name = curStrategy.settings.name;
+	if (!name) name="(untitled)";
+	var newTitle = name+lastPrice+" - "+title;
+	if (saved) newTitle = "(SAVED) " + newTitle 
+	document.title = newTitle;
+	window.history.replaceState(null,newTitle,uri);	
+	
+}
 
 function Chart(element) {
 	
@@ -332,7 +348,7 @@ function switchStrategy() {
 		if (!curStrategy.settings.lowest)
 			curStrategy.settings.lowest = 0;
 	}	
-	location.hash="";
+	updatePageState("#");
 	updatePage();
 }
 
@@ -359,7 +375,7 @@ function saveForSharing(id) {
 	var pkg = [id,data];
 	var strpkg = JSON.stringify(pkg);
 	var b64 = LZString.compressToEncodedURIComponent(strpkg);
-	location.hash = "#share="+b64;	
+	updatePageState("#share="+b64,true);	
 }
 
 
@@ -503,7 +519,7 @@ function importStrategy(data) {
 		}
 	} catch (e) {
 		alert("Import has failed: "+ e.toString());
-		location.hash="";		
+		updatePageState("#");		
 	}
 	return null;
 }
