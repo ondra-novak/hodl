@@ -332,6 +332,7 @@ function switchStrategy() {
 		if (!curStrategy.settings.lowest)
 			curStrategy.settings.lowest = 0;
 	}	
+	location.hash="";
 	updatePage();
 }
 
@@ -352,6 +353,17 @@ function updateStrategySelection(curSelection) {
 			 sel.add(opt);		  
 	  }	
 }
+
+function saveForSharing(id) {
+	var data = JSON.parse(localStorage[id]);
+	var pkg = [id,data];
+	var strpkg = JSON.stringify(pkg);
+	var b64 = LZString.compressToEncodedURIComponent(strpkg);
+	location.hash = "#share="+b64;	
+}
+
+
+
 
 function saveCurrentStrategy() {
 	function valNum(x) {
@@ -376,9 +388,11 @@ function saveCurrentStrategy() {
 	if (curStrategyID=="") {
 		curStrategyID = "s."+Date.now();
 	}
+	curStrategy.rev=Date.now();
 	localStorage[curStrategyID] = JSON.stringify(curStrategy);
 	updateStrategySelection(curStrategyID);
 	updatePage();
+	setTimeout(saveForSharing.bind(null, curStrategyID),100);
 	
 } 
 
@@ -472,12 +486,44 @@ function delStrategy() {
 	}
 }
 
+function importStrategy(data) {
+	try {
+		var pkgstr = LZString.decompressFromEncodedURIComponent(data);
+		var pkg = JSON.parse(pkgstr);
+		var curStgstr = localStorage[pkg[0]];
+		if (curStgstr) {
+			var curStg = JSON.parse(curStgstr);
+			if (!(curStg.rev && curStg.rev >= pkg[1].rev)) {
+				localStorage[pkg[0]] = JSON.stringify(pkg[1]);
+				return pkg[0];
+			}			
+		} else {
+			localStorage[pkg[0]] = JSON.stringify(pkg[1]);
+			return pkg[0];			
+		}
+	} catch (e) {
+		alert("Import has failed: "+ e.toString());
+		location.hash="";		
+	}
+	return null;
+}
 
+function checkHash() {
+	 if (location.hash.substr(0,7) == "#share=") {
+		 var swstr = importStrategy(location.hash.substr(7));
+		 if (swstr) {
+			updateStrategySelection(swstr);	
+			switchStrategy();				 
+		 }
+	 }		 
+}
 function start() {
 
    google.charts.load('current', {'packages':['corechart']});
    google.charts.setOnLoadCallback(function() {
-		
+
+	    $id("workArea").hidden=false;
+	    $id("loadSpinner").hidden=true;
 		chart = new Chart(chartContainer);
 	
 		updateStrategySelection(localStorage["strategySelected"]);	
@@ -499,6 +545,9 @@ function start() {
 		 $id("buttfork").addEventListener("click", copyStrategy);
 		 $id("buttdel").addEventListener("click", delStrategy);
 		 setInterval((new DelayUpdateChart()).update,1000);
+		 checkHash();
+		 window.addEventListener("hashchange",checkHash);
+		 
    });
    $id("tybutton").addEventListener("click",function(e){
    		document.querySelector(".support-page").classList.add("hid");   		

@@ -4,10 +4,12 @@
   <title>Crypto trading advisor</title>
   <link rel="stylesheet" href="css/style.css">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta charset="UTF-8">
 </head>
 
 <body onload="start()">
 <script src="js/code.js" type="text/javascript"></script>
+<script src="js/compress.js" type="text/javascript"></script>
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 
 
@@ -25,7 +27,11 @@
 </div>
 </template>
 
-<div id="workArea">
+<div id="loadSpinner">
+<div class="lds-facebook"><div></div><div></div><div></div></div>
+</div>
+
+<div id="workArea" hidden="hidden">
 
 
 <div class="header">
