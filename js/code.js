@@ -513,9 +513,14 @@ function checkHash() {
 		 var swstr = importStrategy(location.hash.substr(7));
 		 if (swstr) {
 			updateStrategySelection(swstr);	
-			switchStrategy();				 
+			switchStrategy();	
+			return true;
 		 }
-	 }		 
+	 } else {
+		 
+	 }	
+	 return false;
+	 
 }
 function start() {
 
@@ -526,8 +531,6 @@ function start() {
 	    $id("loadSpinner").hidden=true;
 		chart = new Chart(chartContainer);
 	
-		updateStrategySelection(localStorage["strategySelected"]);	
-		switchStrategy();
 	
 		 
 		 $id("saveStrategy").addEventListener("click", function() {
@@ -545,7 +548,10 @@ function start() {
 		 $id("buttfork").addEventListener("click", copyStrategy);
 		 $id("buttdel").addEventListener("click", delStrategy);
 		 setInterval((new DelayUpdateChart()).update,1000);
-		 checkHash();
+		 if (!checkHash()) {
+			updateStrategySelection(localStorage["strategySelected"]);	
+			switchStrategy();
+		 }
 		 window.addEventListener("hashchange",checkHash);
 		 
    });
