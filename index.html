@@ -75,7 +75,7 @@
 <div class="date">Date</div>
 <div class="price">Price <span class="currencyName">currency</span></div>
 <div class="assetChange"><span class="assetName">asset</span> change</div>
-<div class="advice adviceVal">Advice</div>
+<div class="advice adviceVal">Advice<span title="OOS = Out Of Strategy - trade is not part of the strategy, however it still affects the budget, so following calculations are also adjusted to the new value of the budget" class="questionmark">?</span></div>
 <div class="earncost">Earns/Costs</div>
 <div class="relativepl">relative P/L</div>
 <div class="unrealizedpl">unrealzd. P/L</div>
@@ -89,7 +89,7 @@
 <div class="date">NOW</div>
 <div class="price"><input type="text" id="newPrice" class="ingrid"/></div>
 <div class="assetChange"><input type="text" id="newAssetChange" class="ingrid"/></div>
-<div class="advice"><select id="oos"><option value="0" class="adviceVal" selected>0</options><option value="1">OOS *)</option></select></div>
+<div class="advice"><select id="oos"><option value="0" class="adviceVal" selected>0</options><option value="1">OOS (out of strategy)</option></select></div>
 <div class="earncost">0</div>
 <div class="relativepl">0 %</div>
 <div class="unrealizedpl">0</div>
@@ -108,7 +108,29 @@
 <div class="unrealizedplp"></div>
 <div class="actions"></div>
 </div>
-<div class="smallNote">*) OOS = Out Of Strategy - trade is not part of the strategy, however it still affects the budget, so following calculations are also adjusted to the new value of the budget</div>
+<div class="chartSelector">
+<div class="chartDesc" id="chartDescSelect" data-select="">
+Description:
+<div class="total">Unrealized value of the held assets plus sum of already realized earn/costs at given point</div>
+<div class="unrealized">Unrealized value of the held assets at given point</div>
+<div class="realized">Sum of earns/costs received from the beginning to the given point</div>
+<div class="normalized">Unrealized value of the held assets recalculated to the initial price plus sum of already realized earn/costs at given point. This chart shows success of the strategy more accurate because it removes any volatility of the price</div>
+<div class="relative">Compares of the "total" with the HODL permormance and express the differnce.</div>
+</div>
+  <span>Type of chart: </span>
+  <select id="chartType">
+    <option value="total">Total</option>
+    <option value="unrealized">Unrealized</option>
+    <option value="realized">Realized</option>
+    <option value="normalized">Normalized</option>    
+    <option value="relative">Compared to HODL</option>
+  </select>
+  <select id="chartUnit">
+    <option value="currency" class="currencyName">CURRENCY</option>
+    <option value="percent">%</option>
+  </select>  
+</div>
+
 </div>
 </div>
 <div id="chartContainer" style="height: 370px; width: 100%;"></div>

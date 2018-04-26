@@ -173,7 +173,7 @@ label > select {
 .questionmark {
 	display: inline-block;
 	color: white;
-	font-size: larger;
+	font-size: 0.35cm;
 	background-color: black;
 	padding: 0px 2px;
 	font-weight: bold;
@@ -181,6 +181,7 @@ label > select {
 	border-radius: 10px;
 	position:relative;
 	top: -0.5em;
+	cursor: default;
 }
 .footer {
 	position:fixed;
@@ -277,3 +278,36 @@ margin-top: 20vh;
     height: 26px;
   }
 }
+
+
+
+.chartSelector {
+	margin-top: 2em;
+	text-align: right;
+}
+.chartDesc{
+	   float: right;
+	   text-align: left;
+	   width:  50%;
+	   font-weight: bold;
+	   padding: 0 1cm 0 1cm;
+	   box-sizing: border-box;
+}
+.chartSelector:after {
+	content:"";
+	clear: both;
+	display: block;
+}
+
+.advice select {
+	width: 5.5em;
+}
+
+.chartDesc > div{display:none;font-weight: normal;}
+.chartDesc[data-select=total] >div.total {display:block;}
+.chartDesc[data-select=unrealized] >div.unrealized {display:block;}
+.chartDesc[data-select=realized] >div.realized {display:block;}
+.chartDesc[data-select=normalized] >div.normalized {display:block;}
+.chartDesc[data-select=relative] >div.relative {display:block;}
+
+

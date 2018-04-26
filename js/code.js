@@ -40,10 +40,8 @@ function Chart(element) {
 	var elm = element;
 	var chart = new google.visualization.LineChart(element);
 	var options = {
-	          title: 'Strategy performance',
 	          curveType: 'none',
 	          legend: { position: 'bottom' },
-	          colors:['#888888', '#88CCCC', '#000088'],
 	          vAxis : {
 	        	  minorGridlines: {
 	        		  count:5
@@ -53,25 +51,53 @@ function Chart(element) {
 	          pointsVisible:true
 	        };
 	
+	var title = 'Strategy performance';
 		
-	this.update = function(hodl,advice,user) {
+	this.update = function(hodl,advice,user,name) {
 
-		if (hodl.length < 2) {
+		if (name) options.title = title+": "+name;
+		else options.title = title;
+		
+		var maxLen = hodl.length;
+		if (advice.length>maxLen) maxLen = advice.length;
+		if (user.length>maxLen) maxLen = user.length;
+		
+		if (maxLen < 2) {
 			elm.hidden = true;	
 			return;
 		} else {
 			elm.hidden = false;
 		}
 		
-		var data = [["Trade","HODLing performance","Advices performance","User performance"]];
+		var axis = ["Trade"];
+		options.colors = [];
+		if (hodl.length==maxLen) {
+			axis.push("HODLing performance");
+			options.colors.push("#888888");
+		}
+		if (advice.length==maxLen) {
+			axis.push("Advices performance");
+			options.colors.push("#88CCCC");
+		}
+		if (user.length==maxLen) {
+			axis.push("User performance");
+			options.colors.push("#000088");
+		}
+		
+		var data = [axis];
 		var ticks = [];
 		
-		for (var i = 0 ; i < hodl.length; i++) {
-			data.push( [i,hodl[i],advice[i],user[i]]);
+		for (var i = 0 ; i < maxLen; i++) {
+			var row = [i];
+			if (hodl.length==maxLen) row.push(hodl[i]);
+			if (advice.length==maxLen) row.push(advice[i]);
+			if (user.length==maxLen) row.push(user[i]);
+			
+			data.push( row);
 			ticks.push({v:i,f:""+i});
 		}
-		if (hodl.length)  {
-			options.vAxis.baseline = hodl[0];
+		if (user.length)  {
+			options.vAxis.baseline = hodl[0] || advice[0] || user[0];
 		}
 		options.hAxis.ticks = ticks;
 		
@@ -295,6 +321,16 @@ function updateChart() {
 	var hodlChart=[];
 	var adviceChart=[];
 	var userChart=[];
+	var chartTypeElm = $id("chartType")
+	var chartUnitElm = $id("chartUnit")
+	var chartType = chartTypeElm.value;
+	var chartUnit = chartUnitElm.value;
+	
+	$id("chartDescSelect").dataset.select = chartType;
+	
+	var name = chartTypeElm.options[chartTypeElm.selectedIndex].text + " (" 
+			   + chartUnitElm.options[chartUnitElm.selectedIndex].text + ")";
+	
 	
 	var assets = curStrategy.initial.amount;
 	var price = curStrategy.initial.price;
@@ -305,16 +341,51 @@ function updateChart() {
 	var adviceCosts = adviceCurrencies;
 	var userAssets = assets;
 	var userCosts = initCurrencies;
+	var curPrice;
 	
-	function updateChartData(p) {
-		hodlChart.push(assets*p - initCurrencies);
-		adviceChart.push(adviceAssets*p - adviceCosts);
-		userChart.push(userAssets*p - userCosts);
+	function updateChartDataTotal() {
+		hodlChart.push(assets*curPrice - initCurrencies);
+		adviceChart.push(adviceAssets*curPrice - adviceCosts);
+		userChart.push(userAssets*curPrice - userCosts);
+	}
+
+	function updateChartDataUnrealized() {
+		hodlChart.push(assets*curPrice - initCurrencies);
+		adviceChart.push(adviceAssets*curPrice - initCurrencies);
+		userChart.push(userAssets*curPrice - initCurrencies);
+	}
+
+
+	function updateChartDataRealized() {
+		adviceChart.push(initCurrencies-adviceCosts);
+		userChart.push(initCurrencies-userCosts);
 	}
 	
-	updateChartData(price);
+	function updateChartDataNormalized() {
+		adviceChart.push((adviceAssets-hodlAssets)*curStrategy.initial.price + (initCurrencies-adviceCosts));
+		userChart.push((userAssets-hodlAssets)*curStrategy.initial.price + (initCurrencies-userCosts));		
+	}
+	function updateChartDataRelative() {
+		var hodl = assets*curPrice - initCurrencies;
+		adviceChart.push((adviceAssets*curPrice - adviceCosts) - hodl);
+		userChart.push((userAssets*curPrice - userCosts) - hodl);
+	}
+	
+	var updateChartData;
+	
+	switch (chartType) {
+	case "unrealized":updateChartData = updateChartDataUnrealized;break;
+	case "realized":updateChartData = updateChartDataRealized;break;
+	case "normalized":updateChartData = updateChartDataNormalized;break;
+	case "relative":updateChartData = updateChartDataRelative;break;
+	default: updateChartData = updateChartDataTotal;break;
+	}
+	
+	curPrice = price;
+	updateChartData();
 	
 	function step(item) {
+		curPrice = item.price;
 		updateChartData(item.price);
 		var advice = calculateAdvice(item.price, adviceAssets, adviceCurrencies)
 		adviceAssets += advice;
@@ -331,8 +402,21 @@ function updateChart() {
 		updateChartData(curprice);		
 	}
 
+	function recalcToPercent(input) {
+		var initial = initCurrencies;
+		return input.reduce(function(cur,val) {
+			cur.push(val/initial*100);
+			return cur;			
+		},[]);
+	}
+
+	if (chartUnit=="percent") {
+		hodlChart = recalcToPercent(hodlChart);
+		adviceChart = recalcToPercent(adviceChart);
+		userChart = recalcToPercent(userChart);
+	}
 	
-	chart.update(hodlChart, adviceChart, userChart);
+	chart.update(hodlChart, adviceChart, userChart, name);
 	
 }
 
@@ -540,6 +624,9 @@ function checkHash() {
 }
 function start() {
 
+	if (localStorage["chartType"]) $id("chartType").value = localStorage["chartType"];
+	if (localStorage["chartUnit"]) $id("chartUnit").value = localStorage["chartUnit"];
+	
    google.charts.load('current', {'packages':['corechart']});
    google.charts.setOnLoadCallback(function() {
 
@@ -563,6 +650,15 @@ function start() {
 		 $id("newPrice").addEventListener("input", onInput);
 		 $id("buttfork").addEventListener("click", copyStrategy);
 		 $id("buttdel").addEventListener("click", delStrategy);
+		 
+		 function changeChartType() {
+			 updateChart();
+			 localStorage["chartType"] = $id("chartType").value;
+			 localStorage["chartUnit"] = $id("chartUnit").value;
+		 }
+		 
+		 $id("chartType").addEventListener("change", changeChartType);
+		 $id("chartUnit").addEventListener("change", changeChartType);
 		 setInterval((new DelayUpdateChart()).update,1000);
 		 if (!checkHash()) {
 			updateStrategySelection(localStorage["strategySelected"]);	
