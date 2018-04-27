@@ -342,6 +342,7 @@ function updateChart() {
 	var userAssets = assets;
 	var userCosts = initCurrencies;
 	var curPrice;
+	var curChange;
 	
 	function updateChartDataTotal() {
 		hodlChart.push(assets*curPrice - initCurrencies);
@@ -386,20 +387,22 @@ function updateChart() {
 	
 	function step(item) {
 		curPrice = item.price;
-		updateChartData(item.price);
+		curChange = item.amount;
 		var advice = calculateAdvice(item.price, adviceAssets, adviceCurrencies)
 		adviceAssets += advice;
 		adviceCurrencies -= advice*item.price;
 		adviceCosts += advice*item.price;
 		userAssets += item.amount;
 		userCosts += item.amount*item.price;
+		updateChartData();
 	}
 	
 	curStrategy.records.forEach(step);
 
-	var curprice = parseFloat($id("newPrice").value);
-	if (!isNaN(curprice)) {
-		updateChartData(curprice);		
+	curPrice = parseFloat($id("newPrice").value);
+	if (!isNaN(curPrice)) {
+		curChange = 0;
+		updateChartData();		
 	}
 
 	function recalcToPercent(input) {
